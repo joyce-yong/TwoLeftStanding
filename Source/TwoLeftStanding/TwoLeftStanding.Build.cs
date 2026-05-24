@@ -20,8 +20,9 @@ public class TwoLeftStanding : ModuleRules
 			"GameplayStateTreeModule",
 			"Niagara",
 			"UMG",
-			"Slate"
-		});
+			"Slate",
+            "PhotonFusion"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
