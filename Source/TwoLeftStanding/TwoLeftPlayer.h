@@ -34,7 +34,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputAction* MoveAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputAction* DashAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Dash")
+	float DashForce = 3000.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement|Dash")
+	float DashCooldown = 1.0f;
+
+	bool bCanDash = true;
+	struct FTimerHandle DashCooldownTimer;
+
 	void Move(const FInputActionValue& Value);
+
+	void Dash(const FInputActionValue& Value);
+	void ResetDash();
 
 public:	
 	// Called every frame

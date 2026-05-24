@@ -3,6 +3,7 @@
 
 #include "TwoLeftPlayer.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -88,6 +89,7 @@ void ATwoLeftPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATwoLeftPlayer::Move);
+        EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ATwoLeftPlayer::Dash);
     }
 
 }
@@ -102,4 +104,28 @@ void ATwoLeftPlayer::Move(const FInputActionValue& Value)
         AddMovementInput(FVector::ForwardVector, MovementVector.Y);
         AddMovementInput(FVector::RightVector, MovementVector.X);
     }
+}
+
+void ATwoLeftPlayer::Dash(const FInputActionValue& Value)
+{
+    if (!bCanDash) return;
+
+    FVector DashDirection = GetCharacterMovement()->GetLastInputVector();
+
+    if (DashDirection.IsNearlyZero())
+    {
+        DashDirection = GetActorForwardVector();
+    }
+
+    DashDirection.Normalize();
+
+    LaunchCharacter(DashDirection * DashForce, true, true);
+
+    bCanDash = false;
+    GetWorldTimerManager().SetTimer(DashCooldownTimer, this, &ATwoLeftPlayer::ResetDash, DashCooldown, false);
+}
+
+void ATwoLeftPlayer::ResetDash()
+{
+    bCanDash = true;
 }
