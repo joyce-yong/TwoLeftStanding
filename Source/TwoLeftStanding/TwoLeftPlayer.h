@@ -51,6 +51,9 @@ protected:
 	void Dash(const FInputActionValue& Value);
 	void ResetDash();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Dash(FVector DashDirection);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

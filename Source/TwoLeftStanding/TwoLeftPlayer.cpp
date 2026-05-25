@@ -121,6 +121,12 @@ void ATwoLeftPlayer::Dash(const FInputActionValue& Value)
 
     LaunchCharacter(DashDirection * DashForce, true, true);
 
+	// If we are not the host, call the server function to execute the dash on the server
+    if (!HasAuthority())
+    {
+        Server_Dash(DashDirection);
+	}
+
     bCanDash = false;
     GetWorldTimerManager().SetTimer(DashCooldownTimer, this, &ATwoLeftPlayer::ResetDash, DashCooldown, false);
 }
@@ -128,4 +134,9 @@ void ATwoLeftPlayer::Dash(const FInputActionValue& Value)
 void ATwoLeftPlayer::ResetDash()
 {
     bCanDash = true;
+}
+
+void ATwoLeftPlayer::Server_Dash_Implementation(FVector DashDirection)
+{
+    LaunchCharacter(DashDirection * DashForce, true, true);
 }
