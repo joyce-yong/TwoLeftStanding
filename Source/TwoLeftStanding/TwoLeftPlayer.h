@@ -37,6 +37,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputAction* DashAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputAction* FireAction;
+
+	// Dash properties
 	UPROPERTY(EditDefaultsOnly, Category = "Movement|Dash")
 	float DashForce = 3000.0f;
 
@@ -46,13 +50,30 @@ protected:
 	bool bCanDash = true;
 	struct FTimerHandle DashCooldownTimer;
 
+	// Combat properties
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TSubclassOf<class ATwoLeftProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	float FireRate = 0.15f;
+
+	bool bCanFire = true;
+	struct FTimerHandle FireTimerHandle;
+
+	// Functions
 	void Move(const FInputActionValue& Value);
 
 	void Dash(const FInputActionValue& Value);
 	void ResetDash();
 
+	void Fire(const FInputActionValue& Value);
+	void ResetFire();
+
 	UFUNCTION(Server, Reliable)
 	void Server_Dash(FVector DashDirection);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Fire(FVector SpawnLocation, FRotator SpawnRotation);
 
 public:	
 	// Called every frame

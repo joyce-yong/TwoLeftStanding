@@ -2,6 +2,7 @@
 
 
 #include "TwoLeftPlayer.h"
+#include "TwoLeftProjectile.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -90,6 +91,7 @@ void ATwoLeftPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
     {
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATwoLeftPlayer::Move);
         EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ATwoLeftPlayer::Dash);
+        EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATwoLeftPlayer::Fire);
     }
 
 }
@@ -136,7 +138,39 @@ void ATwoLeftPlayer::ResetDash()
     bCanDash = true;
 }
 
+void ATwoLeftPlayer::Fire(const FInputActionValue& Value)
+{
+    if (!bCanFire) return;
+
+    FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
+    FRotator SpawnRotation = GetActorRotation();
+
+    Server_Fire(SpawnLocation, SpawnRotation);
+
+    // Cooldown
+    bCanFire = false;
+    GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATwoLeftPlayer::ResetFire, FireRate, false);
+}
+
+void ATwoLeftPlayer::ResetFire()
+{
+    bCanFire = true;
+}
+
 void ATwoLeftPlayer::Server_Dash_Implementation(FVector DashDirection)
 {
     LaunchCharacter(DashDirection * DashForce, true, true);
+}
+
+void ATwoLeftPlayer::Server_Fire_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
+{
+    if (ProjectileClass)
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Owner = this;
+        SpawnParams.Instigator = GetInstigator();
+
+        // Spawn physical bullet
+        GetWorld()->SpawnActor<ATwoLeftProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+    }
 }
