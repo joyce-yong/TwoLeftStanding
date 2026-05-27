@@ -143,7 +143,10 @@ void ATwoLeftPlayer::Fire(const FInputActionValue& Value)
     if (!bCanFire) return;
 
     FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
-    FRotator SpawnRotation = GetActorRotation();
+
+	FRotator BaseRotation = GetActorRotation();
+	float RandomSpread = FMath::RandRange(-BulletSpread, BulletSpread);
+	FRotator SpawnRotation = FRotator(BaseRotation.Pitch, BaseRotation.Yaw + RandomSpread, BaseRotation.Roll);
 
     Server_Fire(SpawnLocation, SpawnRotation);
 

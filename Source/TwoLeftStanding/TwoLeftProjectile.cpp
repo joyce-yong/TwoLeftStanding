@@ -14,6 +14,8 @@ ATwoLeftProjectile::ATwoLeftProjectile()
 
 	bReplicates = true;
 
+	InitialLifeSpan = 3.0f;
+
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	CollisionSphere->InitSphereRadius(15.0f);
 	CollisionSphere->SetCollisionProfileName(TEXT("BlockAllDynamic")); // Block walls & characters

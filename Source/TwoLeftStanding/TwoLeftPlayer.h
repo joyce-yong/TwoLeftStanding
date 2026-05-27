@@ -57,6 +57,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	float FireRate = 0.15f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	float BulletSpread = 3.0f;
+
 	bool bCanFire = true;
 	struct FTimerHandle FireTimerHandle;
 
