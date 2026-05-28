@@ -1,0 +1,12 @@
+D:\Documents\GitHub\TwoLeftStanding\Binaries\DotNET\UnrealBuildTool\Plugins\PhotonFusionUbtPlugin\PhotonFusionUbtPlugin.deps.json
+D:\Documents\GitHub\TwoLeftStanding\Binaries\DotNET\UnrealBuildTool\Plugins\PhotonFusionUbtPlugin\PhotonFusionUbtPlugin.dll
+D:\Documents\GitHub\TwoLeftStanding\Binaries\DotNET\UnrealBuildTool\Plugins\PhotonFusionUbtPlugin\ref\PhotonFusionUbtPlugin.dll
+D:\Documents\GitHub\TwoLeftStanding\Binaries\DotNET\UnrealBuildTool\Plugins\PhotonFusionUbtPlugin\PhotonFusionUbtPlugin.pdb
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFusionUbtPlugin.ubtplugin.csproj.AssemblyReference.cache
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFusionUbtPlugin.ubtplugin.GeneratedMSBuildEditorConfig.editorconfig
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFusionUbtPlugin.ubtplugin.csproj.CoreCompileInputs.cache
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFusionUbtPlugin.ubtplugin.sourcelink.json
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFu.EDED8A21.Up2Date
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFusionUbtPlugin.dll
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\refint\PhotonFusionUbtPlugin.dll
+D:\Documents\GitHub\TwoLeftStanding\Plugins\PhotonFusion\Source\PhotonFusionUbtPlugin\obj\Development\PhotonFusionUbtPlugin.pdb
