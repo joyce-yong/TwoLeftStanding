@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATwoLeftProjectile::ATwoLeftProjectile()
@@ -56,6 +57,13 @@ void ATwoLeftProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	// Destroy bullet when it hits anything other than itself (for now)
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
+		// Only Server should deal damage
+		if (HasAuthority())
+		{
+			// Apply 25 damage
+			UGameplayStatics::ApplyDamage(OtherActor, 25.0f, GetInstigatorController(), this, UDamageType::StaticClass());
+		}
+
 		Destroy();
 	}
 }
