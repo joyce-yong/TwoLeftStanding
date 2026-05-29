@@ -14,6 +14,7 @@ ATwoLeftProjectile::ATwoLeftProjectile()
 
 	bReplicates = true;
 
+	// If the bullet doesn't hit anything for 3s, destroy it automatically
 	InitialLifeSpan = 3.0f;
 
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
