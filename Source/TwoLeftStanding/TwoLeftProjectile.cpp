@@ -60,8 +60,7 @@ void ATwoLeftProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		// Only Server should deal damage
 		if (HasAuthority())
 		{
-			// Apply 25 damage
-			UGameplayStatics::ApplyDamage(OtherActor, 25.0f, GetInstigatorController(), this, UDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, GetInstigatorController(), this, UDamageType::StaticClass());
 		}
 
 		Destroy();
