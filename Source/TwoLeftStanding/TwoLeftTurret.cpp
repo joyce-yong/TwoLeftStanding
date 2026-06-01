@@ -8,6 +8,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ATwoLeftTurret::ATwoLeftTurret()
@@ -134,10 +135,30 @@ void ATwoLeftTurret::CheckLineOfSight()
 {
     if (TargetPlayer == nullptr) return;
 
-    // In a real game, you'd do a LineTrace (Raycast) here to make sure a wall isn't blocking them.
-    // For now, if they are in the circle, we fire!
-    CurrentState = ETurretState::Firing;
-    Fire();
+	FHitResult HitResult;
+	FVector StartLocation = HeadMesh->GetComponentLocation();
+	FVector EndLocation = TargetPlayer->GetActorLocation();
+
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+
+	bool  bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams);
+
+	FColor LaserColor = FColor::Red;
+
+    if (bHit && HitResult.GetActor() == TargetPlayer)
+    {
+        LaserColor = FColor::Green;
+        CurrentState = ETurretState::Firing;
+        Fire();
+    }
+    else
+    {
+        CurrentState = ETurretState::Tracking;
+	}
+
+    // Debug Line
+    // DrawDebugLine(GetWorld(), StartLocation, EndLocation, LaserColor, false, 0.5f, 0, 2.0f);
 }
 
 void ATwoLeftTurret::Fire()
