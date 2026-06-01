@@ -42,6 +42,12 @@ ATwoLeftProjectile::ATwoLeftProjectile()
 void ATwoLeftProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Ignore Owner (Player/Turret)
+	if (GetOwner() != nullptr)
+	{
+		CollisionSphere->IgnoreActorWhenMoving(GetOwner(), true);
+	}
 	
 }
 
@@ -55,7 +61,7 @@ void ATwoLeftProjectile::Tick(float DeltaTime)
 void ATwoLeftProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Destroy bullet when it hits anything other than itself (for now)
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherActor != GetOwner()) && (OtherComp != nullptr))
 	{
 		// Only Server should deal damage
 		if (HasAuthority())
