@@ -69,6 +69,17 @@ void ATwoLeftProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 			UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, GetInstigatorController(), this, UDamageType::StaticClass());
 		}
 
+		Multicast_PlayImpactFX(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+
 		Destroy();
 	}
 }
+
+void ATwoLeftProjectile::Multicast_PlayImpactFX_Implementation(FVector HitLocation, FRotator HitRotation)
+{
+	if (ImpactFX)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, HitLocation, HitRotation);
+	}
+}
+

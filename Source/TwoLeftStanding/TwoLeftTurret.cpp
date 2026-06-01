@@ -8,6 +8,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -174,6 +175,8 @@ void ATwoLeftTurret::Fire()
         SpawnParams.Instigator = GetInstigator();
 
         GetWorld()->SpawnActor<ATwoLeftProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+        Multicast_PlayMuzzleFlash();
     }
 }
 
@@ -193,5 +196,13 @@ float ATwoLeftTurret::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
     }
 
     return DamageAmount;
+}
+
+void ATwoLeftTurret::Multicast_PlayMuzzleFlash_Implementation()
+{
+    if (MuzzleFlashFX)
+    {
+        UGameplayStatics::SpawnEmitterAttached(MuzzleFlashFX, HeadMesh, FName("Muzzle"));
+    }
 }
 

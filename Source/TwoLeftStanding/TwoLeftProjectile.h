@@ -34,6 +34,13 @@ protected:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	// VFX
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	class UParticleSystem* ImpactFX;
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayImpactFX(FVector HitLocation, FRotator HitRotation);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

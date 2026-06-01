@@ -77,6 +77,13 @@ protected:
 	void Fire();
 	void FindNewTarget();
 
+	// VFX
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	class UParticleSystem* MuzzleFlashFX;
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayMuzzleFlash();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
