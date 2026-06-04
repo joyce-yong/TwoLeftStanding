@@ -41,6 +41,7 @@ void ATwoLeftTurret::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentHealth = MaxHealth;
+    TargetRotation = HeadMesh->GetComponentRotation();
 	
 }
 
@@ -51,6 +52,7 @@ void ATwoLeftTurret::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ATwoLeftTurret, TargetPlayer);
 	DOREPLIFETIME(ATwoLeftTurret, CurrentState);
     DOREPLIFETIME(ATwoLeftTurret, CurrentHealth);
+    DOREPLIFETIME(ATwoLeftTurret, TargetRotation);
 }
 
 // Called every frame
@@ -58,17 +60,21 @@ void ATwoLeftTurret::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (TargetPlayer != nullptr)
-	{
-		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(HeadMesh->GetComponentLocation(), TargetPlayer->GetActorLocation());
+    if (HasAuthority())
+    {
+        if (TargetPlayer != nullptr)
+        {
+            FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(HeadMesh->GetComponentLocation(), TargetPlayer->GetActorLocation());
 
-		LookAtRotation.Pitch = 0.0f;
-		LookAtRotation.Roll = 0.0f;
+            LookAtRotation.Pitch = 0.0f;
+            LookAtRotation.Roll = 0.0f;
 
-		FRotator SmoothRotation = FMath::RInterpTo(HeadMesh->GetComponentRotation(), LookAtRotation, DeltaTime, RotationSpeed);
-		HeadMesh->SetWorldRotation(SmoothRotation);
-	}
+            TargetRotation = LookAtRotation;
+        }
+    }
 
+    FRotator SmoothRotation = FMath::RInterpTo(HeadMesh->GetComponentRotation(), TargetRotation, DeltaTime, RotationSpeed);
+    HeadMesh->SetWorldRotation(SmoothRotation);
 }
 
 void ATwoLeftTurret::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

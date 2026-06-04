@@ -61,6 +61,9 @@ protected:
 	UPROPERTY(Replicated)
 	class ATwoLeftPlayer* TargetPlayer;
 
+	UPROPERTY(Replicated)
+	FRotator TargetRotation;
+
 	UPROPERTY()
 	TArray<class ATwoLeftPlayer*> PlayersInRange;
 

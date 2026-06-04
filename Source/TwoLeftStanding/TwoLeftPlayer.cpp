@@ -9,6 +9,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATwoLeftPlayer::ATwoLeftPlayer()
@@ -44,6 +46,9 @@ ATwoLeftPlayer::ATwoLeftPlayer()
 void ATwoLeftPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentHealth = MaxHealth;
+	bIsDead = false;
 
     if (APlayerController* PC = Cast<APlayerController>(Controller))
     {
@@ -98,6 +103,8 @@ void ATwoLeftPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ATwoLeftPlayer::Move(const FInputActionValue& Value)
 {
+    if (bIsDead) return;
+
     FVector2D MovementVector = Value.Get<FVector2D>();
 
     if (Controller != nullptr)
@@ -110,7 +117,7 @@ void ATwoLeftPlayer::Move(const FInputActionValue& Value)
 
 void ATwoLeftPlayer::Dash(const FInputActionValue& Value)
 {
-    if (!bCanDash) return;
+    if (bIsDead || !bCanDash) return;
 
     FVector DashDirection = GetCharacterMovement()->GetLastInputVector();
 
@@ -140,7 +147,7 @@ void ATwoLeftPlayer::ResetDash()
 
 void ATwoLeftPlayer::Fire(const FInputActionValue& Value)
 {
-    if (!bCanFire) return;
+    if (bIsDead || !bCanFire) return;
 
     FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
 
@@ -176,4 +183,36 @@ void ATwoLeftPlayer::Server_Fire_Implementation(FVector SpawnLocation, FRotator 
         // Spawn physical bullet
         GetWorld()->SpawnActor<ATwoLeftProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
     }
+}
+
+float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    if (HasAuthority() && !bIsDead)
+    {
+        CurrentHealth -= DamageAmount;
+
+        // Debug
+        GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Player Health: %f"), CurrentHealth));
+
+        if (CurrentHealth <= 0.0f)
+        {
+            CurrentHealth = 0.0f;
+            bIsDead = true;
+
+            // Disable player collision
+            GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Player is down"));
+        }
+    }
+
+    return DamageAmount;
+}
+
+void ATwoLeftPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ATwoLeftPlayer, CurrentHealth);
+    DOREPLIFETIME(ATwoLeftPlayer, bIsDead);
 }
