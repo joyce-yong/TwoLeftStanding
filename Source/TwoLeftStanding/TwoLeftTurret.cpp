@@ -140,11 +140,16 @@ void ATwoLeftTurret::FindNewTarget()
 
 void ATwoLeftTurret::CheckLineOfSight()
 {
-    if (TargetPlayer == nullptr) return;
+    if (TargetPlayer == nullptr || TargetPlayer->bIsDead)
+    {
+        TargetPlayer = nullptr;
+        FindNewTarget();
+        return;
+    }
 
 	FHitResult HitResult;
 	FVector StartLocation = HeadMesh->GetComponentLocation();
-	FVector EndLocation = TargetPlayer->GetActorLocation();
+    FVector EndLocation = TargetPlayer->GetActorLocation() + FVector(0.0f, 0.0f, 60.0f);
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);

@@ -16,10 +16,6 @@ public:
 	// Sets default values for this character's properties
 	ATwoLeftPlayer();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class USpringArmComponent* CameraBoom;
@@ -87,6 +83,10 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_Fire(FVector SpawnLocation, FRotator SpawnRotation);
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
