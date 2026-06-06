@@ -44,7 +44,7 @@ ATwoLeftPlayer::ATwoLeftPlayer()
     // Revive Sphere
     ReviveSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ReviveSphere"));
     ReviveSphere->SetupAttachment(RootComponent);
-    ReviveSphere->InitSphereRadius(150.0f);
+    ReviveSphere->InitSphereRadius(200.0f);
 
     // Turn on when player is downed
     ReviveSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -310,8 +310,6 @@ void ATwoLeftPlayer::OnReviveOverlapBegin(UPrimitiveComponent* OverlappedComp, A
         if (SurvivingPlayer != this && !SurvivingPlayer->bIsDead)
         {
             SurvivingPlayer->PlayerToRevive = this;
-
-            // (Later, we will trigger the "Press E" UI here)
         }
     }
 }
@@ -323,8 +321,6 @@ void ATwoLeftPlayer::OnReviveOverlapEnd(UPrimitiveComponent* OverlappedComp, AAc
         if (SurvivingPlayer->PlayerToRevive == this)
         {
             SurvivingPlayer->PlayerToRevive = nullptr;
-
-            // (Later, we will hide the "Press E" UI here)
         }
     }
 }
