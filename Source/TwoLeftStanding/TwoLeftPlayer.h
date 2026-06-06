@@ -23,6 +23,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* TopDownCamera;
 
+	// Revive Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
+	class USphereComponent* ReviveSphere;
+
 	// Enhanced Input
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* DefaultMappingContext;
@@ -35,6 +39,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputAction* FireAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputAction* ReviveAction;
 
 	// Dash properties
 	UPROPERTY(EditDefaultsOnly, Category = "Movement|Dash")
@@ -66,11 +73,21 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth;
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	UPROPERTY(ReplicatedUsing = OnRep_IsDead, VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	bool bIsDead;
 
+	// Revive properties
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
+	bool bIsBeingRevived;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
+	float ReviveProgress;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
+	class ATwoLeftPlayer* PlayerToRevive;
+
 	// Functions
-	void Move(const FInputActionValue& Value);
+	void Move(const FInputActionValue& Value); 
 
 	void Dash(const FInputActionValue& Value);
 	void ResetDash();
@@ -78,11 +95,26 @@ public:
 	void Fire(const FInputActionValue& Value);
 	void ResetFire();
 
+	void StartRevive(const FInputActionValue& Value);
+	void StopRevive(const FInputActionValue& Value);
+
 	UFUNCTION(Server, Reliable)
 	void Server_Dash(FVector DashDirection);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Fire(FVector SpawnLocation, FRotator SpawnRotation);
+
+	UFUNCTION(Server, Reliable)
+	void Server_CompleteRevive(class ATwoLeftPlayer* TargetPlayer);
+
+	UFUNCTION()
+	void OnRep_IsDead();
+
+	UFUNCTION()
+	void OnReviveOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnReviveOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	// Called when the game starts or when spawned

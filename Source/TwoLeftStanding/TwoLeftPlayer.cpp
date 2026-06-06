@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -39,6 +40,18 @@ ATwoLeftPlayer::ATwoLeftPlayer()
 
     TopDownCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
     TopDownCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+    // Revive Sphere
+    ReviveSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ReviveSphere"));
+    ReviveSphere->SetupAttachment(RootComponent);
+    ReviveSphere->InitSphereRadius(150.0f);
+
+    // Turn on when player is downed
+    ReviveSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    // Bind Revive Overlaps
+    ReviveSphere->OnComponentBeginOverlap.AddDynamic(this, &ATwoLeftPlayer::OnReviveOverlapBegin);
+    ReviveSphere->OnComponentEndOverlap.AddDynamic(this, &ATwoLeftPlayer::OnReviveOverlapEnd);
 
 }
 
@@ -83,6 +96,26 @@ void ATwoLeftPlayer::Tick(float DeltaTime)
                 PC->SetControlRotation(LookRotation);
             }
         }
+
+		// Revive Timer Logic
+        if (bIsBeingRevived && PlayerToRevive != nullptr)
+        {
+            ReviveProgress += DeltaTime;
+
+            if (ReviveProgress >= 4.0f)
+            {
+                bIsBeingRevived = false;
+                ReviveProgress = 0.0f;
+
+                Server_CompleteRevive(PlayerToRevive);
+
+                PlayerToRevive = nullptr;
+            }
+        }
+        else
+        {
+            ReviveProgress = 0.0f;
+        }
     }
 
 }
@@ -97,6 +130,10 @@ void ATwoLeftPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATwoLeftPlayer::Move);
         EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ATwoLeftPlayer::Dash);
         EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATwoLeftPlayer::Fire);
+        // Revive Input
+        EnhancedInputComponent->BindAction(ReviveAction, ETriggerEvent::Started, this, &ATwoLeftPlayer::StartRevive);
+        EnhancedInputComponent->BindAction(ReviveAction, ETriggerEvent::Completed, this, &ATwoLeftPlayer::StopRevive);
+        EnhancedInputComponent->BindAction(ReviveAction, ETriggerEvent::Canceled, this, &ATwoLeftPlayer::StopRevive);
     }
 
 }
@@ -167,6 +204,20 @@ void ATwoLeftPlayer::ResetFire()
     bCanFire = true;
 }
 
+void ATwoLeftPlayer::StartRevive(const FInputActionValue& Value)
+{
+    if (PlayerToRevive != nullptr && !bIsDead)
+    {
+        bIsBeingRevived = true;
+    }
+}
+
+void ATwoLeftPlayer::StopRevive(const FInputActionValue& Value)
+{
+    bIsBeingRevived = false;
+    ReviveProgress = 0.0f;
+}
+
 void ATwoLeftPlayer::Server_Dash_Implementation(FVector DashDirection)
 {
     LaunchCharacter(DashDirection * DashForce, true, true);
@@ -185,6 +236,22 @@ void ATwoLeftPlayer::Server_Fire_Implementation(FVector SpawnLocation, FRotator 
     }
 }
 
+void ATwoLeftPlayer::Server_CompleteRevive_Implementation(ATwoLeftPlayer* TargetPlayer)
+{
+    if (TargetPlayer && TargetPlayer->bIsDead)
+    {
+        TargetPlayer->bIsDead = false;
+
+        // 50% health
+        TargetPlayer->CurrentHealth = TargetPlayer->MaxHealth * 0.5f;
+
+        TargetPlayer->OnRep_IsDead();
+
+        // Debug
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Player Revived"));
+    }
+}
+
 float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
     if (HasAuthority() && !bIsDead)
@@ -199,8 +266,7 @@ float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
             CurrentHealth = 0.0f;
             bIsDead = true;
 
-            // Disable player collision
-            GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+            OnRep_IsDead();
 
             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Player is down"));
         }
@@ -215,4 +281,50 @@ void ATwoLeftPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
     DOREPLIFETIME(ATwoLeftPlayer, CurrentHealth);
     DOREPLIFETIME(ATwoLeftPlayer, bIsDead);
+}
+
+void ATwoLeftPlayer::OnRep_IsDead()
+{
+    if (bIsDead)
+    {
+        // Ignore everything
+        GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+        // Keep blocking the floor
+        GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+        GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+
+        ReviveSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    }
+    else
+    {
+        GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+        ReviveSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+}
+
+void ATwoLeftPlayer::OnReviveOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (ATwoLeftPlayer* SurvivingPlayer = Cast<ATwoLeftPlayer>(OtherActor))
+    {
+        if (SurvivingPlayer != this && !SurvivingPlayer->bIsDead)
+        {
+            SurvivingPlayer->PlayerToRevive = this;
+
+            // (Later, we will trigger the "Press E" UI here)
+        }
+    }
+}
+
+void ATwoLeftPlayer::OnReviveOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+    if (ATwoLeftPlayer* SurvivingPlayer = Cast<ATwoLeftPlayer>(OtherActor))
+    {
+        if (SurvivingPlayer->PlayerToRevive == this)
+        {
+            SurvivingPlayer->PlayerToRevive = nullptr;
+
+            // (Later, we will hide the "Press E" UI here)
+        }
+    }
 }
