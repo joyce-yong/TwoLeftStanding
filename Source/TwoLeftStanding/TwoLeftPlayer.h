@@ -27,6 +27,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
 	class USphereComponent* ReviveSphere;
 
+	// Death Visuals
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
+	class UPostProcessComponent* DeathPostProcess;
+
 	// Enhanced Input
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* DefaultMappingContext;

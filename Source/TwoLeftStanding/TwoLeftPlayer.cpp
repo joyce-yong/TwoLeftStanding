@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -54,6 +55,20 @@ ATwoLeftPlayer::ATwoLeftPlayer()
     // Bind Revive Overlaps
     ReviveSphere->OnComponentBeginOverlap.AddDynamic(this, &ATwoLeftPlayer::OnReviveOverlapBegin);
     ReviveSphere->OnComponentEndOverlap.AddDynamic(this, &ATwoLeftPlayer::OnReviveOverlapEnd);
+
+	// Death Post Process
+    DeathPostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("DeathPostProcess"));
+    DeathPostProcess->SetupAttachment(RootComponent);
+
+    DeathPostProcess->bEnabled = false;
+
+    // Override Saturation (black & white)
+    DeathPostProcess->Settings.bOverride_ColorSaturation = true;
+    DeathPostProcess->Settings.ColorSaturation = FVector4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Override Vignette (dark shadows around edges)
+    DeathPostProcess->Settings.bOverride_VignetteIntensity = true;
+    DeathPostProcess->Settings.VignetteIntensity = 1.0f;
 
 }
 
@@ -314,6 +329,11 @@ void ATwoLeftPlayer::OnRep_IsDead()
 {
     if (bIsDead)
     {
+        if (IsLocallyControlled())
+        {
+            DeathPostProcess->bEnabled = true;
+        }
+
         // Ignore everything
         GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 
@@ -325,6 +345,11 @@ void ATwoLeftPlayer::OnRep_IsDead()
     }
     else
     {
+        if (IsLocallyControlled())
+        {
+            DeathPostProcess->bEnabled = false;
+        }
+
         GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
         ReviveSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
