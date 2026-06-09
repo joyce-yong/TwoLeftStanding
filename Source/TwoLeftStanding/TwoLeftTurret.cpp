@@ -120,9 +120,19 @@ void ATwoLeftTurret::FindNewTarget()
         }
     }
 
-    if (PlayersInRange.Num() > 0)
+    // Loop through array and find first living player
+	TargetPlayer = nullptr;
+    for (ATwoLeftPlayer* Player : PlayersInRange)
     {
-        TargetPlayer = PlayersInRange[0];
+        if (Player && !Player->bIsDead)
+        {
+            TargetPlayer = Player;
+            break;
+        }
+	}
+
+    if (TargetPlayer != nullptr)
+    {
         CurrentState = ETurretState::Tracking;
 
         if (!GetWorldTimerManager().IsTimerActive(FireTimerHandle))
@@ -132,7 +142,6 @@ void ATwoLeftTurret::FindNewTarget()
     }
     else
     {
-        TargetPlayer = nullptr;
         CurrentState = ETurretState::Idle;
         GetWorldTimerManager().ClearTimer(FireTimerHandle);
     }
