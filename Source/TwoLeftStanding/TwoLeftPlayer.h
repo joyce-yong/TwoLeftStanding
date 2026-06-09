@@ -52,6 +52,7 @@ public:
 
 	bool bCanDash = true;
 	struct FTimerHandle DashCooldownTimer;
+	struct FTimerHandle DashDurationTimer;
 
 	// Combat properties
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
@@ -90,6 +91,7 @@ public:
 	void Move(const FInputActionValue& Value); 
 
 	void Dash(const FInputActionValue& Value);
+	void StopDash();
 	void ResetDash();
 
 	void Fire(const FInputActionValue& Value);

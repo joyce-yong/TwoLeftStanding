@@ -37,6 +37,8 @@ ATwoLeftPlayer::ATwoLeftPlayer()
     CameraBoom->bInheritPitch = false;
     CameraBoom->bInheritYaw = false;
     CameraBoom->bInheritRoll = false;
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->CameraLagSpeed = 8.0f;
 
     TopDownCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
     TopDownCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -94,6 +96,14 @@ void ATwoLeftPlayer::Tick(float DeltaTime)
 
                 // Updates controller rotation
                 PC->SetControlRotation(LookRotation);
+
+                // Distance between player and mouse
+				FVector MouseDirection = Hit.ImpactPoint - GetActorLocation();
+				MouseDirection.Z = 0.0f;
+
+				MouseDirection = MouseDirection.GetClampedToMaxSize(400.0f);
+
+                CameraBoom->TargetOffset = FMath::VInterpTo(CameraBoom->TargetOffset, MouseDirection, DeltaTime, 3.0f);
             }
         }
 
@@ -165,6 +175,10 @@ void ATwoLeftPlayer::Dash(const FInputActionValue& Value)
 
     DashDirection.Normalize();
 
+    // Turn off friction for the dash duration
+    GetCharacterMovement()->GroundFriction = 0.0f;
+    GetCharacterMovement()->BrakingDecelerationWalking = 0.0f;
+
     LaunchCharacter(DashDirection * DashForce, true, true);
 
 	// If we are not the host, call the server function to execute the dash on the server
@@ -174,12 +188,20 @@ void ATwoLeftPlayer::Dash(const FInputActionValue& Value)
 	}
 
     bCanDash = false;
+    GetWorldTimerManager().SetTimer(DashDurationTimer, this, &ATwoLeftPlayer::StopDash, 0.2f, false);
     GetWorldTimerManager().SetTimer(DashCooldownTimer, this, &ATwoLeftPlayer::ResetDash, DashCooldown, false);
 }
 
 void ATwoLeftPlayer::ResetDash()
 {
     bCanDash = true;
+}
+
+void ATwoLeftPlayer::StopDash()
+{
+	// Restore friction after dash
+    GetCharacterMovement()->GroundFriction = 8.0f;
+    GetCharacterMovement()->BrakingDecelerationWalking = 2048.0f;
 }
 
 void ATwoLeftPlayer::Fire(const FInputActionValue& Value)
@@ -220,7 +242,12 @@ void ATwoLeftPlayer::StopRevive(const FInputActionValue& Value)
 
 void ATwoLeftPlayer::Server_Dash_Implementation(FVector DashDirection)
 {
+    GetCharacterMovement()->GroundFriction = 0.0f;
+    GetCharacterMovement()->BrakingDecelerationWalking = 0.0f;
+
     LaunchCharacter(DashDirection * DashForce, true, true);
+
+    GetWorldTimerManager().SetTimer(DashDurationTimer, this, &ATwoLeftPlayer::StopDash, 0.2f, false);
 }
 
 void ATwoLeftPlayer::Server_Fire_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
