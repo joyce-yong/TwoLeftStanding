@@ -11,6 +11,8 @@ ATwoLeftEnemy::ATwoLeftEnemy()
 
 	bReplicates = true;
 
+	ACharacter::SetReplicateMovement(true);
+
 }
 
 // Called when the game starts or when spawned
