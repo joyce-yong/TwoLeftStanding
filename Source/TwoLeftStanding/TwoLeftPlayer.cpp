@@ -285,7 +285,8 @@ void ATwoLeftPlayer::Server_CompleteRevive_Implementation(ATwoLeftPlayer* Target
         TargetPlayer->bIsDead = false;
 
         // 50% health
-        TargetPlayer->CurrentHealth = TargetPlayer->MaxHealth * 0.5f;
+        float RevivedHealth = TargetPlayer->MaxHealth * 0.5f;
+        TargetPlayer->CurrentHealth = RevivedHealth;
 
         TargetPlayer->OnRep_IsDead();
 
@@ -310,6 +311,7 @@ float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
             OnRep_IsDead();
 
+            // Debug
             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Player is down"));
         }
     }
@@ -323,6 +325,7 @@ void ATwoLeftPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
     DOREPLIFETIME(ATwoLeftPlayer, CurrentHealth);
     DOREPLIFETIME(ATwoLeftPlayer, bIsDead);
+    DOREPLIFETIME(ATwoLeftPlayer, bIsBeingRevived);
 }
 
 void ATwoLeftPlayer::OnRep_IsDead()
