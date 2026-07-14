@@ -91,6 +91,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
 	class ATwoLeftPlayer* PlayerToRevive;
 
+	// UI properties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	bool bIsMenuOpen = false;
+
 	// Functions
 	void Move(const FInputActionValue& Value); 
 

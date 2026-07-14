@@ -221,7 +221,7 @@ void ATwoLeftPlayer::StopDash()
 
 void ATwoLeftPlayer::Fire(const FInputActionValue& Value)
 {
-    if (bIsDead || !bCanFire) return;
+    if (bIsDead || !bCanFire || bIsMenuOpen) return;
 
     FVector SpawnLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
 
