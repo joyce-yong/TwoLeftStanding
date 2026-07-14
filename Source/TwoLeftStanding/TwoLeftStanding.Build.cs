@@ -20,8 +20,7 @@ public class TwoLeftStanding : ModuleRules
 			"GameplayStateTreeModule",
 			"Niagara",
 			"UMG",
-			"Slate",
-            "PhotonFusion"
+			"Slate"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -40,8 +39,10 @@ public class TwoLeftStanding : ModuleRules
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
 		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
+		PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
+        // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+        PrivateDependencyModuleNames.Add("OnlineSubsystemSteam");
+        PrivateDependencyModuleNames.Add("SteamSockets");
+    }
 }
