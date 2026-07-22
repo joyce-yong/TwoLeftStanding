@@ -23,6 +23,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* TopDownCamera;
 
+	// Gun Components
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
+	class UStaticMeshComponent* GunMesh;
+
 	// Revive Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Revive")
 	class USphereComponent* ReviveSphere;
@@ -125,6 +129,30 @@ public:
 
 	UFUNCTION()
 	void OnReviveOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayShootAnim();
+
+	UFUNCTION(Server, Reliable)
+	void Server_PlayReviveAnim();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayReviveAnim();
+
+	UFUNCTION(Server, Reliable)
+	void Server_StopReviveAnim();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopReviveAnim();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+	void PlayShootAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+	void PlayReviveAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+	void StopReviveAnimation();
 
 protected:
 	// Called when the game starts or when spawned

@@ -44,6 +44,11 @@ ATwoLeftPlayer::ATwoLeftPlayer()
     TopDownCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
     TopDownCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
+    // Gun Mesh
+    GunMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunMesh"));
+    GunMesh->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
+    GunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
     // Revive Sphere
     ReviveSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ReviveSphere"));
     ReviveSphere->SetupAttachment(RootComponent);
@@ -135,6 +140,7 @@ void ATwoLeftPlayer::Tick(float DeltaTime)
                 Server_CompleteRevive(PlayerToRevive);
 
                 PlayerToRevive = nullptr;
+                Server_StopReviveAnim();
             }
         }
         else
@@ -246,6 +252,7 @@ void ATwoLeftPlayer::StartRevive(const FInputActionValue& Value)
     if (PlayerToRevive != nullptr && !bIsDead)
     {
         bIsBeingRevived = true;
+        Server_PlayReviveAnim();
     }
 }
 
@@ -253,6 +260,7 @@ void ATwoLeftPlayer::StopRevive(const FInputActionValue& Value)
 {
     bIsBeingRevived = false;
     ReviveProgress = 0.0f;
+    Server_StopReviveAnim();
 }
 
 void ATwoLeftPlayer::Server_Dash_Implementation(FVector DashDirection)
@@ -267,6 +275,8 @@ void ATwoLeftPlayer::Server_Dash_Implementation(FVector DashDirection)
 
 void ATwoLeftPlayer::Server_Fire_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
 {
+    SpawnLocation = GunMesh->GetSocketLocation(TEXT("Muzzle"));
+
     if (ProjectileClass)
     {
         FActorSpawnParameters SpawnParams;
@@ -275,6 +285,8 @@ void ATwoLeftPlayer::Server_Fire_Implementation(FVector SpawnLocation, FRotator 
 
         // Spawn physical bullet
         GetWorld()->SpawnActor<ATwoLeftProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+        Multicast_PlayShootAnim();
     }
 }
 
@@ -378,4 +390,29 @@ void ATwoLeftPlayer::OnReviveOverlapEnd(UPrimitiveComponent* OverlappedComp, AAc
             SurvivingPlayer->PlayerToRevive = nullptr;
         }
     }
+}
+
+void ATwoLeftPlayer::Multicast_PlayShootAnim_Implementation()
+{
+    PlayShootAnimation();
+}
+
+void ATwoLeftPlayer::Server_PlayReviveAnim_Implementation()
+{
+    Multicast_PlayReviveAnim();
+}
+
+void ATwoLeftPlayer::Multicast_PlayReviveAnim_Implementation()
+{
+    PlayReviveAnimation();
+}
+
+void ATwoLeftPlayer::Server_StopReviveAnim_Implementation()
+{
+    Multicast_StopReviveAnim();
+}
+
+void ATwoLeftPlayer::Multicast_StopReviveAnim_Implementation()
+{
+    StopReviveAnimation();
 }
