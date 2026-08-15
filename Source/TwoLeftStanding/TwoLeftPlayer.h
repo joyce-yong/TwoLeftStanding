@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "TwoLeftReward.h"
 #include "TwoLeftPlayer.generated.h"
 
 UCLASS()
@@ -99,6 +100,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	bool bIsMenuOpen = false;
 
+	// Reward properties
+	bool bIsDamageBoosted = false;
+	float DamageMultiplier = 1.0f;
+
+	bool bIsSpeedBoosted = false;
+	float OriginalMaxWalkSpeed = 600.0f;
+
 	// Functions
 	void Move(const FInputActionValue& Value); 
 
@@ -154,9 +162,24 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void StopReviveAnimation();
 
+	void ApplyReward(ERewardType RewardType, float Amount);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Healing Logic
+	void ApplyHeal(float HealAmount);
+
+	// Speed Boost Logic
+	FTimerHandle SpeedBoostTimerHandle;
+	void ApplySpeedBoost(float Multiplier, float Duration = 5.0f);
+	void ResetSpeedBoost();
+
+	// Damage Boost Logic
+	FTimerHandle DamageBoostTimerHandle;
+	void ApplyDamageBoost(float Multiplier, float Duration = 5.0f);
+	void ResetDamageBoost();
 
 public:	
 	// Called every frame
