@@ -3,6 +3,7 @@
 
 #include "TwoLeftEnemy.h"
 #include "TwoLeftPlayerState.h"
+#include "TwoLeftReward.h"
 
 // Sets default values
 ATwoLeftEnemy::ATwoLeftEnemy()
@@ -51,6 +52,22 @@ float ATwoLeftEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 		if (CurrentHealth <= 0.0f)
 		{
+			// Reward drop chance
+			if (HasAuthority() && RewardClassToDrop != nullptr)
+			{
+				float RandomRoll = FMath::FRand();
+
+				if (RandomRoll <= DropChance)
+				{
+					FVector SpawnLocation = GetActorLocation() + FVector(0.0f, 0.0f, 50.0f);
+
+					FActorSpawnParameters SpawnParams;
+					SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+					GetWorld()->SpawnActor<ATwoLeftReward>(RewardClassToDrop, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+				}
+			}
+
 			// Add kill to the player who killed this enemy
 			if (EventInstigator != nullptr)
 			{
