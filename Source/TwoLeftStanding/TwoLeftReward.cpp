@@ -10,7 +10,7 @@
 ATwoLeftReward::ATwoLeftReward()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
 
@@ -31,6 +31,20 @@ void ATwoLeftReward::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ATwoLeftReward::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (RewardMesh)
+	{
+		RewardMesh->AddLocalRotation(FRotator(0.0f, RotationRate * DeltaTime, 0.0f));
+		RunningTime += DeltaTime;
+		float NewZOffset = FMath::Sin(RunningTime * FloatSpeed) * FloatAmplitude;
+
+		RewardMesh->SetRelativeLocation(FVector(0.0f, 0.0f, NewZOffset));
+	}
 }
 
 void ATwoLeftReward::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
