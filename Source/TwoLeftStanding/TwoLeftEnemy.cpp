@@ -2,6 +2,7 @@
 
 
 #include "TwoLeftEnemy.h"
+#include "TwoLeftPlayerState.h"
 
 // Sets default values
 ATwoLeftEnemy::ATwoLeftEnemy()
@@ -50,6 +51,14 @@ float ATwoLeftEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 		if (CurrentHealth <= 0.0f)
 		{
+			// Add kill to the player who killed this enemy
+			if (EventInstigator != nullptr)
+			{
+				if (ATwoLeftPlayerState* PS = EventInstigator->GetPlayerState<ATwoLeftPlayerState>())
+				{
+					PS->AddKill();
+				}
+			}
 			Destroy();
 		}
 	}
