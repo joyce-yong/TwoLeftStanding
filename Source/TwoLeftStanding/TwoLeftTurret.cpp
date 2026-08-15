@@ -158,8 +158,8 @@ void ATwoLeftTurret::CheckLineOfSight()
     }
 
 	FHitResult HitResult;
-	FVector StartLocation = HeadMesh->GetComponentLocation();
-    FVector EndLocation = TargetPlayer->GetActorLocation() + FVector(0.0f, 0.0f, 60.0f);
+	FVector StartLocation = HeadMesh->GetSocketLocation(FName("Muzzle"));
+    FVector EndLocation = TargetPlayer->GetActorLocation();
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
