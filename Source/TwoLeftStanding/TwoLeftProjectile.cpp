@@ -2,6 +2,7 @@
 
 
 #include "TwoLeftProjectile.h"
+#include "TwoLeftPlayer.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -66,7 +67,14 @@ void ATwoLeftProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		// Only Server should deal damage
 		if (HasAuthority())
 		{
-			UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, GetInstigatorController(), this, UDamageType::StaticClass());
+			float FinalDamage = DamageAmount;
+
+			if (ATwoLeftPlayer* Shooter = Cast<ATwoLeftPlayer>(GetOwner()))
+			{
+				FinalDamage *= Shooter->DamageMultiplier;
+			}
+
+			UGameplayStatics::ApplyDamage(OtherActor, FinalDamage, GetInstigatorController(), this, UDamageType::StaticClass());
 		}
 
 		Multicast_PlayImpactFX(Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
