@@ -3,6 +3,7 @@
 
 #include "TwoLeftPlayer.h"
 #include "TwoLeftProjectile.h"
+#include "TwoLeftReward.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -329,6 +330,92 @@ float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
     }
 
     return DamageAmount;
+}
+
+void ATwoLeftPlayer::ApplyReward(ERewardType RewardType, float Amount)
+{
+    if (!HasAuthority()) return;
+
+    switch (RewardType)
+    {
+    case ERewardType::Health:
+        ApplyHeal(Amount);
+        break;
+    case ERewardType::DamageBoost:
+        ApplyDamageBoost(Amount, 5.0f);
+        break;
+    case ERewardType::SpeedBoost:
+        ApplySpeedBoost(Amount, 5.0f);
+        break;
+    }
+}
+
+void ATwoLeftPlayer::ApplyHeal(float HealAmount)
+{
+    CurrentHealth = FMath::Clamp(CurrentHealth + HealAmount, 0.0f, MaxHealth);
+    
+    // Debug
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Healed! Current Health: %f"), CurrentHealth));
+}
+
+void ATwoLeftPlayer::ApplySpeedBoost(float Multiplier, float Duration)
+{
+    UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+    if (!MoveComp) return;
+
+    if (!bIsSpeedBoosted)
+    {
+        OriginalMaxWalkSpeed = MoveComp->MaxWalkSpeed;
+        bIsSpeedBoosted = true;
+    }
+
+    // Apply multiplier
+    MoveComp->MaxWalkSpeed = OriginalMaxWalkSpeed * Multiplier;
+
+    // Duration Extension Math
+    float RemainingTime = GetWorldTimerManager().GetTimerRemaining(SpeedBoostTimerHandle);
+    float TotalDuration = Duration + (RemainingTime > 0.0f ? RemainingTime : 0.0f);
+
+    GetWorldTimerManager().SetTimer(SpeedBoostTimerHandle, this, &ATwoLeftPlayer::ResetSpeedBoost, TotalDuration, false);
+
+    // Debug
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, TEXT("Speed Boost Applied!"));
+}
+
+void ATwoLeftPlayer::ResetSpeedBoost()
+{
+    if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+    {
+        MoveComp->MaxWalkSpeed = OriginalMaxWalkSpeed;
+    }
+    bIsSpeedBoosted = false;
+
+    // Debug
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, TEXT("Speed Boost Expired"));
+}
+
+void ATwoLeftPlayer::ApplyDamageBoost(float Multiplier, float Duration)
+{
+    DamageMultiplier = Multiplier;
+    bIsDamageBoosted = true;
+
+    // Duration Extension Math
+    float RemainingTime = GetWorldTimerManager().GetTimerRemaining(DamageBoostTimerHandle);
+    float TotalDuration = Duration + (RemainingTime > 0.0f ? RemainingTime : 0.0f);
+
+    GetWorldTimerManager().SetTimer(DamageBoostTimerHandle, this, &ATwoLeftPlayer::ResetDamageBoost, TotalDuration, false);
+
+    // Debug
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Damage Boost Applied!"));
+}
+
+void ATwoLeftPlayer::ResetDamageBoost()
+{
+    DamageMultiplier = 1.0f;
+    bIsDamageBoosted = false;
+
+    // Debug
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Damage Boost Expired"));
 }
 
 void ATwoLeftPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

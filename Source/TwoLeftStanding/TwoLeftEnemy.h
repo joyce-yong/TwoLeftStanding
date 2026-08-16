@@ -26,6 +26,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Stats")
 	float CurrentHealth;
 
+	// Drop Reward
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reward")
+	TSubclassOf<class ATwoLeftReward> RewardClassToDrop;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reward", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float DropChance = 0.15f;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

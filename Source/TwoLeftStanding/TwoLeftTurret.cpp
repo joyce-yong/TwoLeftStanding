@@ -4,6 +4,7 @@
 #include "TwoLeftTurret.h"
 #include "TwoLeftPlayer.h"
 #include "TwoLeftProjectile.h"
+#include "TwoLeftPlayerState.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -157,8 +158,8 @@ void ATwoLeftTurret::CheckLineOfSight()
     }
 
 	FHitResult HitResult;
-	FVector StartLocation = HeadMesh->GetComponentLocation();
-    FVector EndLocation = TargetPlayer->GetActorLocation() + FVector(0.0f, 0.0f, 60.0f);
+	FVector StartLocation = HeadMesh->GetSocketLocation(FName("Muzzle"));
+    FVector EndLocation = TargetPlayer->GetActorLocation();
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
@@ -211,6 +212,14 @@ float ATwoLeftTurret::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
         if (CurrentHealth <= 0.0f)
         {
+            // Add kill to the player who killed this enemy
+            if (EventInstigator != nullptr)
+            {
+                if (ATwoLeftPlayerState* PS = EventInstigator->GetPlayerState<ATwoLeftPlayerState>())
+                {
+                    PS->AddKill();
+                }
+            }
             Destroy();
         }
     }
