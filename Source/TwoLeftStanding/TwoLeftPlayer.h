@@ -24,6 +24,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* TopDownCamera;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Materials")
+	class UMaterialParameterCollection* MPC_GlobalData;
+
 	// Gun Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	class UStaticMeshComponent* GunMesh;
