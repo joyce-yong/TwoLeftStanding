@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetMaterialLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/PostProcessComponent.h"
@@ -104,6 +105,13 @@ void ATwoLeftPlayer::Tick(float DeltaTime)
 
     if (IsLocallyControlled())
     {
+        if (TopDownCamera && MPC_GlobalData)
+        {
+            FVector CamLoc = TopDownCamera->GetComponentLocation();
+            FLinearColor CamLocAsColor = FLinearColor(CamLoc.X, CamLoc.Y, CamLoc.Z, 1.0f);
+            UKismetMaterialLibrary::SetVectorParameterValue(GetWorld(), MPC_GlobalData, FName("CameraLocation"), CamLocAsColor);
+        }
+
         if (APlayerController* PC = Cast<APlayerController>(GetController()))
         {
             FHitResult Hit;
@@ -312,6 +320,15 @@ float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 {
     if (HasAuthority() && !bIsDead)
     {
+        if (EventInstigator != nullptr)
+        {
+            if (ATwoLeftPlayer* AttackingPlayer = Cast<ATwoLeftPlayer>(EventInstigator->GetPawn()))
+            {
+                // Ignore damage if attacker is player
+                return 0.0f;
+            }
+        }
+
         CurrentHealth -= DamageAmount;
 
         // Debug
