@@ -320,6 +320,15 @@ float ATwoLeftPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 {
     if (HasAuthority() && !bIsDead)
     {
+        if (EventInstigator != nullptr)
+        {
+            if (ATwoLeftPlayer* AttackingPlayer = Cast<ATwoLeftPlayer>(EventInstigator->GetPawn()))
+            {
+                // Ignore damage if attacker is player
+                return 0.0f;
+            }
+        }
+
         CurrentHealth -= DamageAmount;
 
         // Debug
