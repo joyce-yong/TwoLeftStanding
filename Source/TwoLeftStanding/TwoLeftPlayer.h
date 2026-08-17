@@ -24,6 +24,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* TopDownCamera;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Materials")
+	class UMaterialParameterCollection* MPC_GlobalData;
+
 	// Gun Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Gun")
 	class UStaticMeshComponent* GunMesh;
@@ -153,6 +156,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StopReviveAnim();
 
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Animations")
+	void Multicast_StartDissolve();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void PlayShootAnimation();
 
@@ -161,6 +167,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void StopReviveAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+	void PlayDissolveAnimation();
 
 	void ApplyReward(ERewardType RewardType, float Amount);
 
