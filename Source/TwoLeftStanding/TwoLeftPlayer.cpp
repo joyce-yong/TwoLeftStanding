@@ -520,3 +520,8 @@ void ATwoLeftPlayer::Multicast_StopReviveAnim_Implementation()
 {
     StopReviveAnimation();
 }
+
+void ATwoLeftPlayer::Multicast_StartDissolve_Implementation()
+{
+    PlayDissolveAnimation();
+}

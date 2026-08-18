@@ -156,6 +156,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StopReviveAnim();
 
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Animations")
+	void Multicast_StartDissolve();
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void PlayShootAnimation();
 
@@ -164,6 +167,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void StopReviveAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
+	void PlayDissolveAnimation();
 
 	void ApplyReward(ERewardType RewardType, float Amount);
 
