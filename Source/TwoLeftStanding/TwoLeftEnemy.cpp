@@ -25,6 +25,8 @@ void ATwoLeftEnemy::BeginPlay()
 	{
 		CurrentHealth = MaxHealth;
 	}
+
+	OnHealthChanged(CurrentHealth, MaxHealth);
 }
 
 // Register variables for Replication
