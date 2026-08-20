@@ -20,11 +20,20 @@ protected:
 	virtual void BeginPlay() override;
 
 	// Health Stats
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Stats")
 	float MaxHealth = 100.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category = "Stats")
+	// Trigger OnRep_CurrentHealth on clients whenever CurrentHealth changes
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = "Stats")
 	float CurrentHealth;
+
+	// Called on Clients automatically when CurrentHealth replicates
+	UFUNCTION()
+	void OnRep_CurrentHealth();
+
+	// Blueprint Event you can call/implement in Blueprints to pass values to your WBP_EnemyHealthBar
+	UFUNCTION(BlueprintImplementableEvent, Category = "Stats")
+	void OnHealthChanged(float NewCurrentHealth, float NewMaxHealth);
 
 	// Drop Reward
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reward")
@@ -33,7 +42,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reward", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float DropChance = 0.15f;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -42,4 +51,6 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	// Required to register replicated variables
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
