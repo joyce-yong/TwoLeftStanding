@@ -5,6 +5,7 @@
 #include "TwoLeftPlayer.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATwoLeftReward::ATwoLeftReward()
@@ -56,8 +57,17 @@ void ATwoLeftReward::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 			if (!Player->bIsDead)
 			{
 				Player->ApplyReward(RewardType, RewardAmount);
+				Multicast_PlayPickupSound();
 				Destroy();
 			}
 		}
+	}
+}
+
+void ATwoLeftReward::Multicast_PlayPickupSound_Implementation()
+{
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
 	}
 }

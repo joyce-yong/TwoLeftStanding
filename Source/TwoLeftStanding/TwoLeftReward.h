@@ -54,8 +54,14 @@ protected:
 	// Tracks time for the Sine wave math
 	float RunningTime = 0.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reward|Effects")
+	class USoundBase* PickupSound;
+
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayPickupSound();
 
 public:
 	// Called every frame
