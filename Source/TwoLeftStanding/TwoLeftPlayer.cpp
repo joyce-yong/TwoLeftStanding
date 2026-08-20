@@ -114,23 +114,34 @@ void ATwoLeftPlayer::Tick(float DeltaTime)
 
         if (APlayerController* PC = Cast<APlayerController>(GetController()))
         {
-            FHitResult Hit;
-            // Cast a ray from the mouse to the world
-            if (PC->GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+            FVector WorldLocation, WorldDirection;
+
+            if (PC->DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
             {
-                // Calculate rotation to face the mouse hit
-                FRotator LookRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Hit.ImpactPoint);
+                // Define a mathematical flat plane at the player's height
+                FVector PlaneOrigin = GetActorLocation();
+                FVector PlaneNormal = FVector(0.0f, 0.0f, 1.0f);
+
+                // Shoot a line far into the distance along the mouse direction
+                FVector LineStart = WorldLocation;
+                FVector LineEnd = WorldLocation + (WorldDirection * 10000.0f);
+
+                // Find exactly where that line pierces our invisible plane
+                FVector HitPoint = FMath::LinePlaneIntersection(LineStart, LineEnd, PlaneOrigin, PlaneNormal);
+
+                // Calculate rotation to face the exact mathematical hit point
+                FRotator LookRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), HitPoint);
                 LookRotation.Pitch = 0.f;
                 LookRotation.Roll = 0.f;
 
                 // Updates controller rotation
                 PC->SetControlRotation(LookRotation);
 
-                // Distance between player and mouse
-				FVector MouseDirection = Hit.ImpactPoint - GetActorLocation();
-				MouseDirection.Z = 0.0f;
+                // Distance between player and mouse for Camera offset
+                FVector MouseDirection = HitPoint - GetActorLocation();
+                MouseDirection.Z = 0.0f;
 
-				MouseDirection = MouseDirection.GetClampedToMaxSize(400.0f);
+                MouseDirection = MouseDirection.GetClampedToMaxSize(400.0f);
 
                 CameraBoom->TargetOffset = FMath::VInterpTo(CameraBoom->TargetOffset, MouseDirection, DeltaTime, 3.0f);
             }
