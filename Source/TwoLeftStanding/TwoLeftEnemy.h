@@ -53,4 +53,8 @@ public:
 
 	// Required to register replicated variables
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** Perform a melee attack hit-check (Server Only) */
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void PerformMeleeAttack(FName SocketName = NAME_None, float AttackRadius = 150.0f, float DamageAmount = 15.0f);
 };

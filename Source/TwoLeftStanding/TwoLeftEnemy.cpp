@@ -4,6 +4,8 @@
 #include "TwoLeftPlayerState.h"
 #include "TwoLeftReward.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
+#include "Kismet/GameplayStatics.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 ATwoLeftEnemy::ATwoLeftEnemy()
@@ -100,4 +102,53 @@ float ATwoLeftEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		}
 	}
 	return DamageAmount;
+}
+
+void ATwoLeftEnemy::PerformMeleeAttack(FName SocketName, float AttackRadius, float DamageAmount)
+{
+	// Server handles damage math and hit registration in multiplayer
+	if (!HasAuthority()) return;
+
+	// Default hit location in front of actor if no socket is provided
+	FVector TraceLocation = GetActorLocation() + (GetActorForwardVector() * 100.0f);
+
+	if (SocketName != NAME_None && GetMesh() && GetMesh()->DoesSocketExist(SocketName))
+	{
+		TraceLocation = GetMesh()->GetSocketLocation(SocketName);
+	}
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // Don't hit self
+
+	TArray<FHitResult> HitResults;
+
+	// Perform Multi Sphere Sweep to detect any Pawns (Players)
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		TraceLocation,
+		TraceLocation,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(AttackRadius),
+		QueryParams
+	);
+
+	if (bHit)
+	{
+		for (const FHitResult& Hit : HitResults)
+		{
+			AActor* HitActor = Hit.GetActor();
+			if (HitActor && HitActor != this)
+			{
+				// Safely apply damage passing Controller (EventInstigator) and Enemy (DamageCauser)
+				UGameplayStatics::ApplyDamage(
+					HitActor,
+					DamageAmount,
+					GetController(),
+					this,
+					UDamageType::StaticClass()
+				);
+			}
+		}
+	}
 }
