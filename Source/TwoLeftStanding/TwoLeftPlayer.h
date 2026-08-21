@@ -159,6 +159,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Animations")
 	void Multicast_StartDissolve();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayPickupSound(class USoundBase* SoundToPlay, FVector Location);
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animations")
 	void PlayShootAnimation();
 

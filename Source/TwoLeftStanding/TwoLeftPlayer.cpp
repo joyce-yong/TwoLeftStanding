@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetMaterialLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/PostProcessComponent.h"
@@ -535,4 +536,12 @@ void ATwoLeftPlayer::Multicast_StopReviveAnim_Implementation()
 void ATwoLeftPlayer::Multicast_StartDissolve_Implementation()
 {
     PlayDissolveAnimation();
+}
+
+void ATwoLeftPlayer::Multicast_PlayPickupSound_Implementation(USoundBase* SoundToPlay, FVector Location)
+{
+    if (SoundToPlay)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, SoundToPlay, Location);
+    }
 }

@@ -57,17 +57,10 @@ void ATwoLeftReward::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 			if (!Player->bIsDead)
 			{
 				Player->ApplyReward(RewardType, RewardAmount);
-				Multicast_PlayPickupSound();
+				Player->Multicast_PlayPickupSound(PickupSound, GetActorLocation());
+
 				Destroy();
 			}
 		}
-	}
-}
-
-void ATwoLeftReward::Multicast_PlayPickupSound_Implementation()
-{
-	if (PickupSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
 	}
 }
